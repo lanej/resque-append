@@ -6,7 +6,7 @@ module Resque
     def self.enable!; @enabled = true; end
     def self.enabled; @enabled; end
     def self.enabled?; !!@enabled; end
-    def self.enabled=(enabled); @enabled = enabled; end
+    def self.enabled=(enabled); @enabled = !!enabled; end
     def self.idle!; @processing = false; end
     def self.processing!; @processing = true; end
     def self.processing=(processing); @processing = !!processing; end
@@ -20,7 +20,7 @@ module Resque
     end
 
     def after_enqueue_append(*args)
-      unless Resque::Append.processing?
+      if Resque::Append.enabled? && !Resque::Append.processing?
         Resque::Append.processing!
         Resque::Append.worker.work(0)
         Resque::Append.idle!

@@ -13,7 +13,7 @@ end
 class JobA
   extend Resque::Append
 
-  @queue = :job_a
+  @queue = :default
 
   def self.perform
     JobAudit.events << [self, 'started']
@@ -27,7 +27,7 @@ end
 class JobB
   extend Resque::Append
 
-  @queue = :job_b
+  @queue = :default
 
   def self.perform
     JobAudit.events << [self, 'started']
@@ -42,7 +42,7 @@ end
 class JobC
   extend Resque::Append
 
-  @queue = :job_c
+  @queue = :default
 
   def self.perform
     JobAudit.events << [self, 'started']
@@ -52,28 +52,46 @@ end
 
 describe "resque-append" do
   before(:each) do
-    Resque::Append.enable!
     JobAudit.reset!
+    Resque.remove_queue(:default)
   end
 
-  context "when a job enqueues another job" do
-    it "should run the second job after the first has finished" do
-      Resque.enqueue(JobA)
+  context "when enabled" do
+    before(:each) do
+      Resque::Append.enable!
+    end
 
-      JobAudit.events.should == [
-        [JobA, 'started'],
-        [JobA, 'finished'],
-        [JobB, 'started'],
-        [JobB, 'finished'],
-        [JobC, 'started'],
-        [JobC, 'finished'],
-        [JobC, 'started'],
-        [JobC, 'finished'],
-      ]
+    context "when a job enqueues another job" do
+      it "should run the second job after the first has finished" do
+        Resque.enqueue(JobA)
+
+        JobAudit.events.should == [
+          [JobA, 'started'],
+          [JobA, 'finished'],
+          [JobB, 'started'],
+          [JobB, 'finished'],
+          [JobC, 'started'],
+          [JobC, 'finished'],
+          [JobC, 'started'],
+          [JobC, 'finished'],
+        ]
+      end
+    end
+
+    it "should conform to plugin standards" do
+      Resque::Plugin.lint(Resque::Append)
     end
   end
 
-  it "should conform to plugin standards" do
-    Resque::Plugin.lint(Resque::Append)
+  context "when disabled" do
+    before(:each) do
+      Resque::Append.disable!
+    end
+
+    it "should not run anything" do
+      Resque.enqueue(JobA)
+
+      JobAudit.events.should == []
+    end
   end
 end
