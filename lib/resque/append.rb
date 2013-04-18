@@ -63,9 +63,11 @@ module Resque
       Resque::Append.work
     end
 
-    # resque-scheduler
+    # resque-scheduler integration
     def after_schedule_append(*args)
-      Resque.enqueue(self, *args)
+      if Resque::Append.enabled?
+        Resque.enqueue(self, *args)
+      end
     end
   end
 end

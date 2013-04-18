@@ -8,6 +8,7 @@ group :test do
   gem "pry-nav"
   gem "rb-fsevent"
   gem "resque"
+  gem "resque-scheduler", require: "resque_scheduler"
   gem "rspec"
   gem "yajl-ruby"
 end

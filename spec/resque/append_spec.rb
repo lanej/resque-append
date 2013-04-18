@@ -33,7 +33,7 @@ class JobB
     JobAudit.events << [self, 'started']
 
     Resque.enqueue(JobC)
-    Resque.enqueue(JobC)
+    Resque.enqueue_in(30, JobC)
 
     JobAudit.events << [self, 'finished']
   end
@@ -90,6 +90,12 @@ describe "resque-append" do
 
     it "should not run anything" do
       Resque.enqueue(JobA)
+
+      JobAudit.events.should == []
+    end
+
+    it "should not run anything" do
+      Resque.enqueue_in(30, JobA)
 
       JobAudit.events.should == []
     end
