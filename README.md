@@ -1,5 +1,7 @@
 # Resque::Append
 
+[![Build Status](https://travis-ci.org/lanej/resque-append.png)](https://travis-ci.org/lanej/resque-append)
+
 TODO: Write a gem description
 
 ## Installation
