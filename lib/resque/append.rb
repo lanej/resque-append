@@ -10,6 +10,10 @@ module Resque
       self.enabled = true
     end
 
+    def self.reset!
+      Resque.queues.each { |q| Resque.remove_queue(q) }
+    end
+
     def self.enabled
       @enabled
     end

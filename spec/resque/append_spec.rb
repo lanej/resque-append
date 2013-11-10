@@ -5,6 +5,15 @@ describe "resque-append" do
     Resque.remove_queue(:default)
   end
 
+  it "should #reset!" do
+    Resque.enqueue(JobA)
+
+    Resque::Append.reset!
+    Resque::Append.enable!
+
+    JobAudit.events.should == []
+  end
+
   context "when enabled" do
     before(:each) do
       Resque::Append.enable!
