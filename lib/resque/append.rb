@@ -44,21 +44,18 @@ module Resque
       !!@processing
     end
 
-    def self.worker=(worker)
-      @worker = worker
+    def self.workers=(workers)
+      @workers = Array(workers)
     end
 
-    def self.worker
-      @worker ||= Resque::Worker.new("*").tap do |w|
-        w.cant_fork  = true
-        w.term_child = true
-      end
+    def self.workers
+      @workers ||= [Resque::Worker.new("*").tap { |w| w.cant_fork  = w.term_child = true }]
     end
 
     def self.work
       if Resque::Append.enabled? && !Resque::Append.processing?
         Resque::Append.processing!
-        Resque::Append.worker.work(0)
+        Resque::Append.workers.map { |w| Thread.new { w.work(0) } }.map(&:value)
         Resque::Append.idle!
       end
     end
