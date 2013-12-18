@@ -70,7 +70,8 @@ module Resque
     # resque-scheduler integration
     def after_schedule_append(*args)
       if Resque::Append.enabled?
-        Resque.enqueue(self, *args)
+        # delayed runs last, popped alphabetically when worker is *
+        Resque.enqueue_to("zzzzzzed", self, *args)
       end
     end
   end
